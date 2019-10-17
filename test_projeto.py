@@ -206,7 +206,7 @@ class TestProjeto(unittest.TestCase):
         self.assertEqual(res[0],passaros[0])
         self.assertEqual(res[1],passaros[1])
         self.assertEqual(res[2],passaros[2])
-        
+
 
     def test_remove_pref_pass(self):
         conn = self.__class__.connection
@@ -216,7 +216,7 @@ class TestProjeto(unittest.TestCase):
         adiciona_passaro(conn,passaro)
         adiciona_pref_pass(conn,creador,passaro)
 
-        # Checa que ele foi removido corretamente 
+        # Checa que ele foi removido corretamente
         remove_pref_pass(conn, login=creador,passaro=passaro)
         res=lista_pref_usr_pass(conn,creador)
         self.assertCountEqual(res, [])
