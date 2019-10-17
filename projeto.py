@@ -162,6 +162,42 @@ def lista_pref_usr_pass(conn,login):
         res = cursor.fetchall()
         passaros = tuple(x[0] for x in res)
         return passaros
+def add_curtida(conn,login,post_id,tipo="like"):
+    with conn.cursor() as cursor:
+        try:
+            cursor.execute('INSERT INTO Curtidas (idPost,loginUsuario,Tipo) VALUES (%s,%s,%s)', (post_id,login,tipo))
+        except pymysql.err.IntegrityError as e:
+            raise ValueError(f'Não foi possivel curtir post {post_id}\
+                 usuario {login} {tipo}')
+
+def lista_curtidas(conn,post_id):
+    with conn.cursor() as cursor:
+        cursor.execute('SELECT loginUsuario FROM Curtidas WHERE idPost=%s and Tipo=%s', (post_id,"like"))
+        res = cursor.fetchall()
+
+        pessoas = tuple(x[0] for x in res)
+        return pessoas
+
+
+
+#Lista Usuarios mais Populares de Cada cidade
+def lista_user_pop_cidade(conn):
+    with conn.cursor() as cursor:
+        try:
+            cursor.execute('''
+                    Select DISTINCT Usuarios.Login Pessoa,
+                            Usuarios.Cidade Regiao,
+                                count(User_ref.loginUsuario) Vezes
+                                    from Usuarios
+                                INNER JOIN User_ref ON Usuarios.Login = User_ref.loginUsuario
+                                GROUP BY Usuarios.Cidade, Usuarios.Login'''
+                            )
+            res = cursor.fetchall()
+            return res
+
+        except pymysql.err.IntegrityError as e:
+            raise ValueError(f'Não possivel identificar os usuarios mais populares de cada regiao')
+
 
 # def adiciona_perigo_a_comida(conn, id_perigo, id_comida):
 #     with conn.cursor() as cursor:

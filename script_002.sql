@@ -3,7 +3,7 @@ USE `mydb` ;
 -- -----------------------------------------------------
 -- Table `mydb`.`Posts`
 -- -----------------------------------------------------
-ALTER TABLE `mydb`.`Posts` ADD COLUMN `Data` `datetime` DEFAULT(getdate());
+ALTER TABLE `mydb`.`Posts` ADD COLUMN `Data` DATETIME DEFAULT CURRENT_TIMESTAMP;
 
 DROP TABLE IF EXISTS `mydb`.`Curtidas` ;
 

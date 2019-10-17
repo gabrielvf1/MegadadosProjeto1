@@ -221,6 +221,39 @@ class TestProjeto(unittest.TestCase):
         res=lista_pref_usr_pass(conn,creador)
         self.assertCountEqual(res, [])
 
+    def test_add_curtidas(self):
+        conn = self.__class__.connection
+        creador='antoniojaj'
+        adiciona_usuario(conn, login=creador,nome='Antonio Andraues')
+        adiciona_usuario(conn, login='gabrielvf',nome='Gabriel Francato')
+        adiciona_post(conn=conn,login=creador,texto="DEMAIS ESSE PASSARO @gabrielvf @samuel",titulo="teste",url="NULL",estado="Ativo")
+        id_post=acha_post(conn,login=creador,titulo="teste")
+        lista_de_curtidas=['antoniojaj','gabrielvf']
+
+        add_curtida(conn,login='gabrielvf',post_id=id_post)
+        add_curtida(conn,login='antoniojaj',post_id=id_post)
+        res=lista_curtidas(conn,id_post)
+        self.assertCountEqual(res,lista_de_curtidas)
+        
+
+    def test_lista_user_famosos_regiao(self):
+        conn = self.__class__.connection
+        creador = "antoniojaj"
+        adiciona_usuario(conn, login=creador,nome='Antonio Andraues', cidade="Sao Paulo")
+        adiciona_usuario(conn, login='gabrielvf',nome='Gabriel Francato', cidade="Sao Paulo")
+        adiciona_post(conn=conn,login=creador,texto="DEMAIS ESSE PASSARO @gabrielvf @antoniojaj",titulo="teste",url="NULL",estado="Ativo")
+        adiciona_post(conn=conn,login=creador,texto="DEMAIS ESSE PASSARO @gabrielvf",titulo="teste",url="NULL",estado="Ativo")
+        resultado = lista_user_pop_cidade(conn)
+        print(resultado)
+            
+
+
+
+
+
+
+
+
 
 def run_sql_script(filename):
     global config
