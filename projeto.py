@@ -114,7 +114,7 @@ def adiciona_post(conn, login,texto,titulo,url,estado="Ativo"):
 def remove_post(conn, login, postid): 
     with conn.cursor() as cursor:
         cursor.execute('UPDATE Posts SET Estado=%s WHERE idPost=%s',('Inativo',postid))
-    
+
 #lista quais usuarios foram citados em um post especifico, recebendo o id do post
 def lista_post_ref_user(conn,idPost):
     with conn.cursor() as cursor:
