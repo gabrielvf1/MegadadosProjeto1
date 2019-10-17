@@ -12,7 +12,7 @@ def adiciona_passaro(conn, nome,cor="NULL",
             raise ValueError(f'Não posso inserir o passarinho {nome} \
                             na tabela Desc_passaros')
 
-#acha o primeiro passaro com este nome 
+#acha o primeiro passaro com este nome
 def acha_passaro(conn, nome):
     with conn.cursor() as cursor:
         cursor.execute('SELECT Nome,Cor,Comida,Onde_vive,Tamanho FROM Desc_passaros WHERE Nome = %s', (nome))
@@ -27,7 +27,7 @@ def remove_passaro(conn, nome):
     with conn.cursor() as cursor:
         cursor.execute('DELETE FROM Desc_passaros WHERE Nome=%s', (nome))
 
-#seleciona os nomes dos passaros existentes na base 
+#seleciona os nomes dos passaros existentes na base
 def lista_passaros(conn):
     with conn.cursor() as cursor:
         cursor.execute('SELECT Nome from Desc_passaros')
@@ -41,8 +41,8 @@ def adiciona_usuario(conn,login,nome,email="NULL",cidade="NULL"):
             cursor.execute('INSERT INTO Usuarios (Login,Nome,Email,Cidade) VALUES (%s,%s,%s,%s)', (login,nome,email,cidade))
         except pymysql.err.IntegrityError as e:
             raise ValueError(f'Não posso inserir {nome} na tabela usuario')
-            
-            
+
+
 #acha um usuario presente no banco de dados atraves do seu login
 def acha_usuario(conn, login):
     with conn.cursor() as cursor:
@@ -91,14 +91,18 @@ def adiciona_post(conn, login,texto,titulo,url,estado="Ativo"):
             palavras=texto.split()
             for word in palavras:
                 if(word[0]=="@"):
-                    cursor.execute('INSERT INTO User_ref (idPost,loginUsuario) VALUES (%s,%s)', (id_post,word[1:]))
+                    cursor.execute("""SELECT Login FROM Usuarios WHERE Login LIKE %s""", ('%' + word[1:] + '%',))
+                    res = cursor.fetchone()
+                    if res:
+                        cursor.execute('INSERT INTO User_ref (idPost,loginUsuario) VALUES (%s,%s)', (id_post,word[1:]))
                 if(word[0]=="#"):
                     cursor.execute("""SELECT Nome FROM Desc_passaros WHERE Nome LIKE %s""", ('%' + word[1:] + '%',))
-                    
+
                     res = cursor.fetchone()
                     if res:
                         cursor.execute('INSERT INTO Pass_ref (idPost,nomePassaro) VALUES (%s,%s)', (id_post,res[0]))
-    
+                        
+
 
 
 

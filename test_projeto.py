@@ -153,7 +153,6 @@ class TestProjeto(unittest.TestCase):
 
     def test_post_ref(self):
         conn = self.__class__.connection
-    
         titulo="teste 123"
         creador='antoniojaj'
         adiciona_usuario(conn, login=creador,nome='Antonio Andraues',email="teste@a.com")
@@ -164,10 +163,10 @@ class TestProjeto(unittest.TestCase):
 
         res=lista_post_ref_user(conn,id_post)
         self.assertEqual(first=res,second='gabriel')
-        
+
     def test_post_ref_passaro(self):
         conn = self.__class__.connection
-        
+
         titulo="teste passaro ref"
         creador='antoniojaj'
         adiciona_usuario(conn, login=creador,nome='Antonio Andraues',email="teste@a.com")
@@ -192,7 +191,7 @@ class TestProjeto(unittest.TestCase):
         # Nehuma pref
         res = lista_pref_usr_pass(conn,creador)
         self.assertCountEqual(res, [])
-        
+
          # Adiciona alguns passaros.
         passaros = []
         for p in ('canario', 'cacatua', 'canario da terra'):
