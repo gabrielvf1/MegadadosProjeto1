@@ -367,7 +367,6 @@ class TestProjeto(unittest.TestCase):
         adiciona_post(conn=conn, login=creador, texto="DEMAIS ESSE PASSARO #cacatua", titulo="123",
                       url="www.cacatua.com.br", estado="Ativo", browser='safari', aparelho='MAC-os', IP='127.0.0.0')
 
-
         res = list_url_passaro(conn)
         resultado_deve_ser = [
             ('www.canario.com.br', 'canario da terra'), ('www.canariolindo.com.br', 'canario da terra'), ('www.cacatua.com.br', 'cacatua')]
