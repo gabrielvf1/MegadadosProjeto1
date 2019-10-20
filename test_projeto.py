@@ -12,7 +12,6 @@ import datetime
 
 from projeto import *
 
-
 class TestProjeto(unittest.TestCase):
 
     @classmethod
@@ -373,7 +372,6 @@ class TestProjeto(unittest.TestCase):
         resultado_deve_ser = [
             ('www.canario.com.br', 'canario da terra'), ('www.canariolindo.com.br', 'canario da terra'), ('www.cacatua.com.br', 'cacatua')]
         self.assertListEqual(list(res), resultado_deve_ser)
-
 
 def run_sql_script(filename):
     global config

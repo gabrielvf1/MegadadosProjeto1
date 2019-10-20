@@ -296,10 +296,11 @@ def quantidade_aparelho_browser(conn):
         except pymysql.err.IntegrityError as e:
             raise ValueError(f'Nao foi possivel fazer a tabela de aparelhos por browser')
 
+#Lista com URLs de imagens e respectivos #tags de tipo de pássaro.
 def list_url_passaro(conn):
     with conn.cursor() as cursor:
         try:
-            cursor.execute('''SELECT Posts.URL_IMG, nomePassaro FROM Pass_ref INNER JOIN Posts USING(idPost)'''
+            cursor.execute('''SELECT Posts.URL_IMG, nomePassaro FROM Pass_ref LEFT OUTER JOIN Posts USING(idPost)'''
             )
             res = cursor.fetchall()
             return res
