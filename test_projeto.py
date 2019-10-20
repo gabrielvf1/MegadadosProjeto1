@@ -7,6 +7,8 @@ import re
 import subprocess
 import unittest
 import pymysql
+import time
+import datetime
 
 from projeto import *
 
@@ -37,7 +39,6 @@ class TestProjeto(unittest.TestCase):
 
     def test_adiciona_passaro(self):
         conn = self.__class__.connection
-    
         passaro = 'beija flor'
 
         # Adiciona um passaro não existente.
@@ -158,7 +159,7 @@ class TestProjeto(unittest.TestCase):
         adiciona_usuario(conn, login=creador,nome='Antonio Andraues',email="teste@a.com")
         adiciona_usuario(conn, login='gabriel',nome='Gabriel Francato',email="teste@a.com")
         # Adiciona um post
-        adiciona_post(conn=conn,login=creador,texto="DEMAIS ESSE PASSARO @gabriel",titulo=titulo,url="NULL",estado="Ativo")
+        adiciona_post(conn=conn,login=creador,texto="DEMAIS ESSE PASSARO @gabriel",titulo=titulo,url="NULL",estado="Ativo",browser='safari',aparelho='MAC-os',IP='127.0.0.0')
         id_post=acha_post(conn,login=creador,titulo=titulo)
 
         res=lista_post_ref_user(conn,id_post)
@@ -175,7 +176,7 @@ class TestProjeto(unittest.TestCase):
         # Adiciona um passaro não existente.
         adiciona_passaro(conn, passaro)
         # Adiciona um post
-        adiciona_post(conn=conn,login=creador,texto="DEMAIS ESSE PASSARO #canario",titulo=titulo,url="NULL",estado="Ativo")
+        adiciona_post(conn=conn,login=creador,texto="DEMAIS ESSE PASSARO #canario",titulo=titulo,url="NULL",estado="Ativo",browser='safari',aparelho='MAC-os',IP='127.0.0.0')
         id_post=acha_post(conn,login=creador,titulo=titulo)
 
         res=lista_post_ref_pass(conn,id_post)
@@ -224,35 +225,78 @@ class TestProjeto(unittest.TestCase):
     def test_add_curtidas(self):
         conn = self.__class__.connection
         creador='antoniojaj'
+
         adiciona_usuario(conn, login=creador,nome='Antonio Andraues')
         adiciona_usuario(conn, login='gabrielvf',nome='Gabriel Francato')
-        adiciona_post(conn=conn,login=creador,texto="DEMAIS ESSE PASSARO @gabrielvf @samuel",titulo="teste",url="NULL",estado="Ativo")
+        adiciona_post(conn=conn,login=creador,texto="DEMAIS ESSE PASSARO @gabrielvf @samuel",titulo="teste",url="NULL",estado="Ativo",browser='safari',aparelho='MAC-os',IP='127.0.0.0')
         id_post=acha_post(conn,login=creador,titulo="teste")
         lista_de_curtidas=['antoniojaj','gabrielvf']
 
-        add_curtida(conn,login='gabrielvf',post_id=id_post)
-        add_curtida(conn,login='antoniojaj',post_id=id_post)
+        add_curtida(conn=conn,login='gabrielvf',post_id=id_post,browser='safari',aparelho='MAC-os',IP='127.0.0.0')
+        add_curtida(conn=conn,login='antoniojaj',post_id=id_post,browser='safari',aparelho='MAC-os',IP='127.0.0.1')
         res=lista_curtidas(conn,id_post)
         self.assertCountEqual(res,lista_de_curtidas)
-        
+
 
     def test_lista_user_famosos_regiao(self):
         conn = self.__class__.connection
         creador = "antoniojaj"
         adiciona_usuario(conn, login=creador,nome='Antonio Andraues', cidade="Sao Paulo")
         adiciona_usuario(conn, login='gabrielvf',nome='Gabriel Francato', cidade="Sao Paulo")
+        adiciona_usuario(conn, login='samuelvgb',nome='Samuel', cidade="Bahia")
         adiciona_post(conn=conn,login=creador,texto="DEMAIS ESSE PASSARO @gabrielvf @antoniojaj",titulo="teste",url="NULL",estado="Ativo")
+        adiciona_post(conn=conn,login=creador,texto="DEMAIS ESSE PASSARO!!! @gabrielvf @samuelvgb",titulo="testando",url="NULL",estado="Ativo")
         adiciona_post(conn=conn,login=creador,texto="DEMAIS ESSE PASSARO @gabrielvf",titulo="teste",url="NULL",estado="Ativo")
         resultado = lista_user_pop_cidade(conn)
-        print(resultado)
-            
+        resultado_deve_ser = [('Sao Paulo',3,'gabrielvf'),('Bahia', 1, 'samuelvgb')] 
+        self.assertListEqual(resultado,resultado_deve_ser)
 
 
+    def test_lista_post_cron_rev(self):
+        conn = self.__class__.connection
+        creador = "antoniojaj"
+        adiciona_usuario(conn, login=creador,nome='Antonio Andraues', cidade="Sao Paulo")
+        adiciona_usuario(conn, login='gabrielvf',nome='Gabriel Francato', cidade="Sao Paulo")
+        adiciona_post(conn, login=creador,texto="Legal demais",titulo="Top",url="NULL",estado="Ativo", date='2015-11-05 14:29:36',browser='safari',aparelho='MAC-os',IP='127.0.0.0')
+        adiciona_post(conn=conn,login=creador,texto="Top Demais",titulo="Legal",url="NULL",estado="Ativo", date='2019-11-05 14:29:36',browser='safari',aparelho='MAC-os',IP='127.0.0.0')
+        resultado = lista_post_cron_reverso(conn)
+        date_time_str = resultado[0][6]
+        date_time_str1 = resultado[1][6]
+        self.assertGreater(date_time_str, date_time_str1)
 
+    def test_lista_usr_from_refs(self):
+        conn = self.__class__.connection
+        creador = "antoniojaj"
+        adiciona_usuario(conn, login=creador,nome='Antonio Andraues', cidade="Sao Paulo")
+        adiciona_usuario(conn, login='gabrielvf',nome='Gabriel Francato', cidade="Sao Paulo")
+        adiciona_usuario(conn, login='samuelgranato',nome='Gabriel Francato', cidade="Sao Paulo")
+        adiciona_post(conn=conn,login=creador,texto="DEMAIS ESSE PASSARO @gabrielvf @antoniojaj",titulo="teste",url="NULL",estado="Ativo",browser='safari',aparelho='MAC-os',IP='127.0.0.0')
+        adiciona_post(conn=conn,login=creador,texto="DEMAIS ESSE PASSARO @gabrielvf",titulo="teste",url="NULL",estado="Ativo",browser='safari',aparelho='MAC-os',IP='127.0.0.0')
+        adiciona_post(conn=conn,login='samuelgranato',texto="DEMAIS ESSE PASSARO @gabrielvf",titulo="teste",url="NULL",estado="Ativo",browser='safari',aparelho='MAC-os',IP='127.0.0.0')
+        res=lista_usr_from_refs(conn,'gabrielvf')
+        referencias_gabrielvf = ["antoniojaj","samuelgranato"]
+        self.assertCountEqual(res,referencias_gabrielvf)
+        self.assertListEqual(list(res),referencias_gabrielvf)
 
+    def test_adiciona_tipo_acao(self):
+        conn = self.__class__.connection
+        acoes=["Get","Post","Visualizacao"]
+        for a in acoes:
+            adiciona_tipo_acao(conn,a)
+        res = lista_tipo_acoes(conn)
+        self.assertCountEqual(res,acoes)
+        self.assertListEqual(list(res),acoes)
 
-
-
+    def test_adiciona_acao(self):
+        conn = self.__class__.connection
+        creador = "antoniojaj"
+        adiciona_usuario(conn, login=creador,nome='Antonio Andraues', cidade="Sao Paulo")
+        adiciona_post(conn=conn,login=creador,texto="DEMAIS ESSE PASSARO ",titulo="teste",url="NULL",estado="Ativo",browser='safari',aparelho='MAC-os',IP='127.0.0.0')
+        post_id=acha_post(conn,creador,"teste")
+        add_curtida(conn,login=creador,post_id=post_id,browser='safari',aparelho='MAC-os',IP='127.0.0.0')
+        acoes=lista_tipo_acoes(conn)
+        self.assertIn('adiciona_post',acoes)
+        self.assertIn('curtir',acoes)
 
 
 def run_sql_script(filename):
@@ -260,16 +304,16 @@ def run_sql_script(filename):
     with open(filename, 'rb') as f:
         subprocess.run(
             [
-                config['MYSQL'], 
-                '-u', config['USER'], 
-                '-p' + config['PASS'], 
+                config['MYSQL'],
+                '-u', config['USER'],
+                '-p' + config['PASS'],
                 '-h', config['HOST']
-            ], 
+            ],
             stdin=f
         )
 
 def setUpModule():
-    filenames = [entry for entry in os.listdir() 
+    filenames = [entry for entry in os.listdir()
         if os.path.isfile(entry) and re.match(r'.*_\d{3}\.sql', entry)]
     for filename in filenames:
         run_sql_script(filename)

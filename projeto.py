@@ -82,11 +82,15 @@ def acha_post(conn, login, titulo):
         else:
             return None
 # Insere um post novo ao banco. Reconhecendo quem foi marcado e passaros referenciados. Aqui a logica de adicionar em todas tabelas
-def adiciona_post(conn, login,texto,titulo,url,estado="Ativo"):
+def adiciona_post(conn, login,texto,titulo,url="NULL",estado="Ativo",date="NULL",browser="NULL",aparelho="NULL",IP="0.0.0.0"):
     with conn.cursor() as cursor:
         try:
-            cursor.execute('INSERT INTO Posts (Texto,Titulo,loginUsuario,URL_IMG,Estado)\
-                 VALUES (%s,%s,%s,%s,%s)', (texto,titulo,login,url,estado))
+            if(date=="NULL"):
+                cursor.execute('INSERT INTO Posts (Texto,Titulo,loginUsuario,URL_IMG,Estado)\
+                    VALUES (%s,%s,%s,%s,%s)', (texto,titulo,login,url,estado))
+            else:
+                cursor.execute('INSERT INTO Posts (Texto,Titulo,loginUsuario,URL_IMG,Estado,Data)\
+                    VALUES (%s,%s,%s,%s,%s,%s)', (texto,titulo,login,url,estado,date))
             id_post=acha_post(conn,login,titulo)
             palavras=texto.split()
             for word in palavras:
@@ -101,7 +105,7 @@ def adiciona_post(conn, login,texto,titulo,url,estado="Ativo"):
                     res = cursor.fetchone()
                     if res:
                         cursor.execute('INSERT INTO Pass_ref (idPost,nomePassaro) VALUES (%s,%s)', (id_post,res[0]))
-                        
+            adiciona_acao(conn=conn,login=login,nome_acao='adiciona_post',browser=browser,aparelho=aparelho,IP=IP)    
 
 
 
@@ -114,7 +118,7 @@ def adiciona_post(conn, login,texto,titulo,url,estado="Ativo"):
 def remove_post(conn, login, postid): 
     with conn.cursor() as cursor:
         cursor.execute('UPDATE Posts SET Estado=%s WHERE idPost=%s',('Inativo',postid))
-
+    
 #lista quais usuarios foram citados em um post especifico, recebendo o id do post
 def lista_post_ref_user(conn,idPost):
     with conn.cursor() as cursor:
@@ -162,10 +166,11 @@ def lista_pref_usr_pass(conn,login):
         res = cursor.fetchall()
         passaros = tuple(x[0] for x in res)
         return passaros
-def add_curtida(conn,login,post_id,tipo="like"):
+def add_curtida(conn,login,post_id,browser,aparelho,IP):
     with conn.cursor() as cursor:
         try:
-            cursor.execute('INSERT INTO Curtidas (idPost,loginUsuario,Tipo) VALUES (%s,%s,%s)', (post_id,login,tipo))
+            cursor.execute('INSERT INTO Curtidas (idPost,loginUsuario,Tipo) VALUES (%s,%s,%s)', (post_id,login,'like'))
+            adiciona_acao(conn,login,'curtir',browser,aparelho,IP)
         except pymysql.err.IntegrityError as e:
             raise ValueError(f'Não foi possivel curtir post {post_id}\
                  usuario {login} {tipo}')
@@ -185,19 +190,97 @@ def lista_user_pop_cidade(conn):
     with conn.cursor() as cursor:
         try:
             cursor.execute('''
-                    Select DISTINCT Usuarios.Login Pessoa,
-                            Usuarios.Cidade Regiao,
-                                count(User_ref.loginUsuario) Vezes
-                                    from Usuarios
-                                INNER JOIN User_ref ON Usuarios.Login = User_ref.loginUsuario
-                                GROUP BY Usuarios.Cidade, Usuarios.Login'''
-                            )
+            Select Usuarios.Cidade Regiao,
+                    COUNT(Usuarios.Login) Vezes,
+                        Usuarios.Login  Pessoa
+                    from Usuarios
+                INNER JOIN User_ref ON Usuarios.Login = User_ref.loginUsuario
+            GROUP BY Usuarios.Cidade, Usuarios.Login
+            ORDER BY Vezes DESC
+            '''
+            )
             res = cursor.fetchall()
-            return res
+            listaRegiao = []
+            listaResultado = []
+            for i in res:
+                if (i[0] in listaRegiao):
+                    continue
+                listaRegiao.append(i[0])
+                listaResultado.append(i)
+            populares = tuple(x for x in listaResultado)
+            print(list(populares))
+            return list(populares)
 
         except pymysql.err.IntegrityError as e:
             raise ValueError(f'Não possivel identificar os usuarios mais populares de cada regiao')
 
+def lista_post_cron_reverso(conn):
+    with conn.cursor() as cursor:
+        try:
+            cursor.execute('''Select * FROM Posts
+            ORDER BY Data DESC''')
+            res = cursor.fetchall()
+            return res
+
+        except pymysql.err.IntegrityError as e:
+            raise ValueError(f'Não possivel identificar Posts')
+
+def lista_usr_from_refs(conn,login):
+     with conn.cursor() as cursor:
+        try:
+            cursor.execute('''
+                    Select DISTINCT Posts.loginUsuario
+                                    from Usuarios
+                                INNER JOIN User_ref ON Usuarios.Login = User_ref.loginUsuario
+                                INNER JOIN Posts ON User_ref.idPost = Posts.idPost
+                                WHERE User_ref.loginUsuario=%s''', (login)
+                            )
+            res = cursor.fetchall()
+            pessoas = tuple(x[0] for x in res)
+            return pessoas
+
+        except pymysql.err.IntegrityError as e:
+            raise ValueError(f'Não possivel listar as referencias do usuario {login} ')
+
+def adiciona_tipo_acao(conn,nome):
+    with conn.cursor() as cursor:
+        try:
+            cursor.execute('INSERT INTO Tipo_acao (Nome)\
+                 VALUES (%s)', (nome))
+        except pymysql.err.IntegrityError as e:
+            raise ValueError(f'Não posso inserir a acao de {nome} \
+                            na tabela Tipo_acao')
+
+def lista_tipo_acoes(conn):
+    with conn.cursor() as cursor:
+        cursor.execute('SELECT Nome from Tipo_acao')
+        res = cursor.fetchall()
+        acoes = tuple(x[0] for x in res)
+        return acoes
+
+def adiciona_acao(conn,login,nome_acao,browser,aparelho,IP):
+    with conn.cursor() as cursor:
+        try:
+            if(nome_acao not in list(lista_tipo_acoes(conn))):
+                adiciona_tipo_acao(conn,nome_acao)
+            cursor.execute('INSERT INTO Acoes (loginUsuario,Nome_acao,Browser,Aparelho,IP)\
+                    VALUES (%s,%s,%s,%s,%s)', (login,nome_acao,browser,aparelho,IP))
+
+        except pymysql.err.IntegrityError as e:
+            raise ValueError(f'Não posso inserir a acao do usuario {login} \
+                            na tabela Acoes')
+
+
+# def lista_acoes_usr(conn,login):
+#     with conn.cursor() as cursor:
+#         try:
+#             curso
+    
+# INSERT INTO #table1 (id, guidd, TimeAdded, ExtraData)
+# SELECT #table2.id, #table2.guidd, #table2.TimeAdded, #table2.ExtraData
+# FROM #table2
+# LEFT JOIN #table1 on #table1.id = #table2.id
+# WHERE #table1.id is null
 
 # def adiciona_perigo_a_comida(conn, id_perigo, id_comida):
 #     with conn.cursor() as cursor:
