@@ -173,6 +173,7 @@ def lista_pref_usr_pass(conn,login):
         passaros = tuple(x[0] for x in res)
         return passaros
 
+#adiciona Curtidas
 def add_curtida(conn,login,post_id,browser,aparelho,IP):
     with conn.cursor() as cursor:
         try:
@@ -182,6 +183,7 @@ def add_curtida(conn,login,post_id,browser,aparelho,IP):
             raise ValueError(f'Não foi possivel curtir post {post_id}\
                  usuario {login} {tipo}')
 
+#lista todas as curtidas
 def lista_curtidas(conn,post_id):
     with conn.cursor() as cursor:
         cursor.execute('SELECT loginUsuario FROM Curtidas WHERE idPost=%s and Tipo=%s', (post_id,"like"))
@@ -218,6 +220,7 @@ def lista_user_pop_cidade(conn):
         except pymysql.err.IntegrityError as e:
             raise ValueError(f'Não possivel identificar os usuarios mais populares de cada regiao')
 
+#listas posts em ordem cronologica inversa
 def lista_post_cron_reverso(conn):
     with conn.cursor() as cursor:
         try:
@@ -229,6 +232,7 @@ def lista_post_cron_reverso(conn):
         except pymysql.err.IntegrityError as e:
             raise ValueError(f'Não possivel identificar Posts')
 
+#lista usuarios referenciados
 def lista_usr_from_refs(conn,login):
      with conn.cursor() as cursor:
         try:
@@ -246,6 +250,7 @@ def lista_usr_from_refs(conn,login):
         except pymysql.err.IntegrityError as e:
             raise ValueError(f'Não possivel listar as referencias do usuario {login} ')
 
+#adiciona um tipo de acao
 def adiciona_tipo_acao(conn,nome):
     with conn.cursor() as cursor:
         try:
@@ -255,6 +260,7 @@ def adiciona_tipo_acao(conn,nome):
             raise ValueError(f'Não posso inserir a acao de {nome} \
                             na tabela Tipo_acao')
 
+#lista tipos de acoes
 def lista_tipo_acoes(conn):
     with conn.cursor() as cursor:
         cursor.execute('SELECT Nome from Tipo_acao')
@@ -262,6 +268,7 @@ def lista_tipo_acoes(conn):
         acoes = tuple(x[0] for x in res)
         return acoes
 
+#adiciona acoes
 def adiciona_acao(conn,login,nome_acao,browser,aparelho,IP):
     with conn.cursor() as cursor:
         try:
@@ -273,3 +280,29 @@ def adiciona_acao(conn,login,nome_acao,browser,aparelho,IP):
         except pymysql.err.IntegrityError as e:
             raise ValueError(f'Não posso inserir a acao do usuario {login} \
                             na tabela Acoes')
+
+#Tabela cruzada de quantidade de aparelhos por tipo e por browser.
+def quantidade_aparelho_browser(conn):
+    with conn.cursor() as cursor:
+        try:
+            cursor.execute('''
+            Select Browser, Aparelho, count(Aparelho) from acoes
+            GROUP BY acoes.Aparelho
+            '''
+            )
+            res = cursor.fetchall()
+            return list(res)
+
+        except pymysql.err.IntegrityError as e:
+            raise ValueError(f'Nao foi possivel fazer a tabela de aparelhos por browser')
+
+def list_url_passaro(conn):
+    with conn.cursor() as cursor:
+        try:
+            cursor.execute('''SELECT Posts.URL_IMG, nomePassaro FROM Pass_ref INNER JOIN Posts USING(idPost)'''
+            )
+            res = cursor.fetchall()
+            return res
+
+        except pymysql.err.IntegrityError as e:
+            raise ValueError(f'Nao foi possivel achar imagem para passaro')

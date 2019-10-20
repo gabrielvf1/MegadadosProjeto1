@@ -12,7 +12,9 @@ import datetime
 
 from projeto import *
 
+
 class TestProjeto(unittest.TestCase):
+
     @classmethod
     def setUpClass(cls):
         global config
@@ -325,6 +327,54 @@ class TestProjeto(unittest.TestCase):
         self.assertIn('adiciona_post', acoes)
         self.assertIn('curtir', acoes)
 
+    def test_tabela_browser_aparelho(self):
+        conn = self.__class__.connection
+        creador = "antoniojaj"
+        adiciona_usuario(conn, login=creador,
+                         nome='Antonio Andraues', cidade="Sao Paulo")
+        adiciona_post(conn=conn, login=creador, texto="DEMAIS ESSE PASSARO ", titulo="teste",
+                      url="NULL", estado="Ativo", browser='safari', aparelho='MAC-os', IP='127.0.0.0')
+        post_id = acha_post(conn, creador, "teste")
+        add_curtida(conn, login=creador, post_id=post_id,
+                    browser='safari', aparelho='MAC-os', IP='127.0.0.0')
+        add_curtida(conn, login=creador, post_id=post_id,
+                    browser='chrome', aparelho='IOS', IP='127.0.0.0')
+        add_curtida(conn, login=creador, post_id=post_id,
+                    browser='IE', aparelho='Windows', IP='127.0.0.0')
+        tabela = quantidade_aparelho_browser(conn)
+        resultado_deve_ser = [
+            ('safari', 'MAC-os', 2), ('chrome', 'IOS', 1), ('IE', 'Windows', 1)]
+        self.assertListEqual(tabela, resultado_deve_ser)
+
+    def test_url_passaro(self):
+        conn = self.__class__.connection
+
+        titulo = "teste passaro ref"
+        creador = 'antoniojaj'
+        adiciona_usuario(conn, login=creador,
+                         nome='Antonio Andraues', email="teste@a.com")
+        passaro = 'canario da terra'
+
+        # Adiciona um passaro não existente.
+        adiciona_passaro(conn, passaro)
+        adiciona_passaro(conn, "cacatua")
+        # Adiciona um post
+        adiciona_post(conn=conn, login=creador, texto="DEMAIS ESSE PASSARO #canario", titulo=titulo,
+                      url="www.canario.com.br", estado="Ativo", browser='safari', aparelho='MAC-os', IP='127.0.0.0')
+
+        adiciona_post(conn=conn, login=creador, texto="DEMAIS ESSE PASSARO #canario", titulo="oi",
+                      url="www.canariolindo.com.br", estado="Ativo", browser='safari', aparelho='MAC-os', IP='127.0.0.0')
+
+        adiciona_post(conn=conn, login=creador, texto="DEMAIS ESSE PASSARO #cacatua", titulo="123",
+                      url="www.cacatua.com.br", estado="Ativo", browser='safari', aparelho='MAC-os', IP='127.0.0.0')
+
+
+        res = list_url_passaro(conn)
+        resultado_deve_ser = [
+            ('www.canario.com.br', 'canario da terra'), ('www.canariolindo.com.br', 'canario da terra'), ('www.cacatua.com.br', 'cacatua')]
+        self.assertListEqual(list(res), resultado_deve_ser)
+
+
 def run_sql_script(filename):
     global config
     with open(filename, 'rb') as f:
@@ -338,14 +388,17 @@ def run_sql_script(filename):
             stdin=f
         )
 
+
 def setUpModule():
     filenames = [entry for entry in os.listdir()
                  if os.path.isfile(entry) and re.match(r'.*_\d{3}\.sql', entry)]
     for filename in filenames:
         run_sql_script(filename)
 
+
 def tearDownModule():
     run_sql_script('tear_down.sql')
+
 
 if __name__ == '__main__':
     global config
