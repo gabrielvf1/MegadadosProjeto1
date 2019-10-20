@@ -15,7 +15,7 @@ def adiciona_passaro(conn, nome,cor="NULL",
 #acha o primeiro passaro com este nome
 def acha_passaro(conn, nome):
     with conn.cursor() as cursor:
-        cursor.execute('SELECT Nome,Cor,Comida,Onde_vive,Tamanho FROM Desc_passaros WHERE Nome = %s', (nome))
+        cursor.execute('SELECT * FROM Desc_passaros WHERE Nome = %s', (nome))
         res = cursor.fetchone()
         if res:
             return res[0]
@@ -36,17 +36,17 @@ def lista_passaros(conn):
         return passaros
 
 #Adiona um usuario ao banco utilizando como entrada login e nome sendo obrigatorios
-def adiciona_usuario(conn,login,nome,email="NULL",cidade="NULL"):
+def adiciona_usuario(conn,login,nome,email,cidade):
     with conn.cursor() as cursor:
         try:
             cursor.execute('INSERT INTO Usuarios (Login,Nome,Email,Cidade) VALUES (%s,%s,%s,%s)', (login,nome,email,cidade))
         except pymysql.err.IntegrityError as e:
-            raise ValueError(f'Não posso inserir {nome} na tabela usuario')
+            raise ValueError(f'Não posso inserir {nome} na tabela usuario. ERRO : {str(e)}')
 
 #acha um usuario presente no banco de dados atraves do seu login
 def acha_usuario(conn, login):
     with conn.cursor() as cursor:
-        cursor.execute('SELECT Nome FROM Usuarios WHERE Login = %s', (login))
+        cursor.execute('SELECT * FROM Usuarios WHERE Login = %s', (login))
         res = cursor.fetchone()
         if res:
             return res[0]
@@ -56,8 +56,11 @@ def acha_usuario(conn, login):
 # remove um usuario atraves do seu login
 def remove_usuario(conn, login):
     with conn.cursor() as cursor:
-        cursor.execute('DELETE FROM Usuarios WHERE Login=%s', (login))
-        cursor.execute('UPDATE Posts SET Estado=%s WHERE loginUsuario=%s',('Inativo',login))
+        try:
+            cursor.execute('DELETE FROM Usuarios WHERE Login=%s', (login))
+            cursor.execute('UPDATE Posts SET Estado=%s WHERE loginUsuario=%s',('Inativo',login))
+        except pymysql.err.IntegrityError as e:
+            raise ValueError(f'Não foi possivel remover {nome} da tabela usuario')
 
 #muda o email de um usuario no banco de dados, recebendo login e o novo email que deve ser inserido
 def muda_email_usuario(conn, login, novo_email):
@@ -70,7 +73,7 @@ def muda_email_usuario(conn, login, novo_email):
 # Lista os usuarios presentes na base
 def lista_usuarios(conn):
     with conn.cursor() as cursor:
-        cursor.execute('SELECT Nome from Usuarios')
+        cursor.execute('SELECT Login from Usuarios')
         res = cursor.fetchall()
         usuarios = tuple(x[0] for x in res)
         return usuarios
@@ -116,7 +119,7 @@ def adiciona_post(conn, login,texto,titulo,url="NULL",estado="Ativo",date="NULL"
 
         except pymysql.err.IntegrityError as e:
             raise ValueError(f'Não foi possivel adicionar o post de titulo : {titulo} \
-                            na tabela Posts')
+                            na tabela Posts. ERRO : {str(e)}')
 
 #funcao que faz o delete logico do post, ou seja para remover um post voce deve realizar um update na coluna Estado para inativo.
 def remove_post(conn, login, postid):

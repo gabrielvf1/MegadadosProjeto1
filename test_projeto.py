@@ -96,7 +96,7 @@ class TestProjeto(unittest.TestCase):
         usuario = {"loginUsuario":'Antoniojaj',"Nome":'Antonio Andraues'}
 
         # Adiciona se usuario não existente.
-        adiciona_usuario(conn, login='Antoniojaj', nome='Antonio Andraues')
+        adiciona_usuario(conn, login='Antoniojaj', nome='Antonio Andraues',cidade="São Paulo",email="teste@com.br")
 
         # Checa se o usuario existe.
         nome = acha_usuario(conn, 'Antoniojaj')
@@ -109,11 +109,11 @@ class TestProjeto(unittest.TestCase):
     def test_remove_usuario(self):
 
         conn = self.__class__.connection
-        adiciona_usuario(conn, 'gabrielvf', 'Gabriel Francato')
+        adiciona_usuario(conn, 'gabrielvf', 'Gabriel Francato',"teste@com.br",cidade="São Paulo")
         nome = acha_usuario(conn, 'gabrielvf')
 
         res = lista_usuarios(conn)
-        self.assertCountEqual(res, (nome,))
+        self.assertEqual(res[0],'gabrielvf')
 
         remove_usuario(conn, 'gabrielvf')
 
@@ -123,7 +123,7 @@ class TestProjeto(unittest.TestCase):
     def test_muda_email_usuario(self):
         conn = self.__class__.connection
 
-        adiciona_usuario(conn, login='antonio',nome='Antonio Andraues',email="teste@a.com")
+        adiciona_usuario(conn, login='antonio',nome='Antonio Andraues',cidade="São Paulo",email="teste@a.com")
 
         muda_email_usuario(conn, login='antonio', novo_email='antonio@teste.com')
 
@@ -137,12 +137,12 @@ class TestProjeto(unittest.TestCase):
         # Adiciona alguns usuarios.
         nomes = []
         for p in ('antonio', 'gabriel', 'teste'):
-            adiciona_usuario(conn, p,"Nome teste")
+            adiciona_usuario(conn, p,"Nome teste","t@","São Paulo")
             nomes.append(acha_usuario(conn, p))
 
         # Verifica se os usuarios foram adicionadas corretamente.
         res = lista_usuarios(conn)
-        self.assertCountEqual(res, nomes)
+        self.assertEqual(list(res),nomes)
 
         # Remove os usuarios.
         for c in ('antonio', 'gabriel', 'teste'):
@@ -156,8 +156,8 @@ class TestProjeto(unittest.TestCase):
         conn = self.__class__.connection
         titulo="teste 123"
         creador='antoniojaj'
-        adiciona_usuario(conn, login=creador,nome='Antonio Andraues',email="teste@a.com")
-        adiciona_usuario(conn, login='gabriel',nome='Gabriel Francato',email="teste@a.com")
+        adiciona_usuario(conn, login=creador,nome='Antonio Andraues',email="teste@a.com",cidade="São Paulo")
+        adiciona_usuario(conn, login='gabriel',nome='Gabriel Francato',email="teste@a.com",cidade="São Paulo")
         # Adiciona um post
         adiciona_post(conn=conn,login=creador,texto="DEMAIS ESSE PASSARO @gabriel",titulo=titulo,url="NULL",estado="Ativo",browser='safari',aparelho='MAC-os',IP='127.0.0.0')
         id_post=acha_post(conn,login=creador,titulo=titulo)
@@ -170,7 +170,7 @@ class TestProjeto(unittest.TestCase):
 
         titulo="teste passaro ref"
         creador='antoniojaj'
-        adiciona_usuario(conn, login=creador,nome='Antonio Andraues',email="teste@a.com")
+        adiciona_usuario(conn, login=creador,nome='Antonio Andraues',email="teste@a.com",cidade="São Paulo")
         passaro = 'canario da terra'
 
         # Adiciona um passaro não existente.
@@ -187,7 +187,7 @@ class TestProjeto(unittest.TestCase):
     def test_adiciona_pref_pass(self):
         conn = self.__class__.connection
         creador='antoniojaj'
-        adiciona_usuario(conn, login=creador,nome='Antonio Andraues',email="teste@a.com")
+        adiciona_usuario(conn, login=creador,nome='Antonio Andraues',email="teste@a.com",cidade="São Paulo")
 
         # Nehuma pref
         res = lista_pref_usr_pass(conn,creador)
@@ -213,7 +213,7 @@ class TestProjeto(unittest.TestCase):
         conn = self.__class__.connection
         creador='antoniojaj'
         passaro='canario da terra'
-        adiciona_usuario(conn, login=creador,nome='Antonio Andraues',email="teste@a.com")
+        adiciona_usuario(conn, login=creador,nome='Antonio Andraues',email="teste@a.com",cidade="São Paulo")
         adiciona_passaro(conn,passaro)
         adiciona_pref_pass(conn,creador,passaro)
 
@@ -226,8 +226,8 @@ class TestProjeto(unittest.TestCase):
         conn = self.__class__.connection
         creador='antoniojaj'
 
-        adiciona_usuario(conn, login=creador,nome='Antonio Andraues')
-        adiciona_usuario(conn, login='gabrielvf',nome='Gabriel Francato')
+        adiciona_usuario(conn, login=creador,nome='Antonio Andraues',email="teste@com.br",cidade="São Paulo")
+        adiciona_usuario(conn, login='gabrielvf',nome='Gabriel Francato',email="teste@com.br",cidade="São Paulo")
         adiciona_post(conn=conn,login=creador,texto="DEMAIS ESSE PASSARO @gabrielvf @samuel",titulo="teste",url="NULL",estado="Ativo",browser='safari',aparelho='MAC-os',IP='127.0.0.0')
         id_post=acha_post(conn,login=creador,titulo="teste")
         lista_de_curtidas=['antoniojaj','gabrielvf']
@@ -241,9 +241,9 @@ class TestProjeto(unittest.TestCase):
     def test_lista_user_famosos_regiao(self):
         conn = self.__class__.connection
         creador = "antoniojaj"
-        adiciona_usuario(conn, login=creador,nome='Antonio Andraues', cidade="Sao Paulo")
-        adiciona_usuario(conn, login='gabrielvf',nome='Gabriel Francato', cidade="Sao Paulo")
-        adiciona_usuario(conn, login='samuelvgb',nome='Samuel', cidade="Bahia")
+        adiciona_usuario(conn, login=creador,nome='Antonio Andraues', cidade="Sao Paulo",email="teste@com.br")
+        adiciona_usuario(conn, login='gabrielvf',nome='Gabriel Francato', cidade="Sao Paulo",email="teste@com.br")
+        adiciona_usuario(conn, login='samuelvgb',nome='Samuel', cidade="Bahia",email="teste@com.br")
         adiciona_post(conn=conn,login=creador,texto="DEMAIS ESSE PASSARO @gabrielvf @antoniojaj",titulo="teste",url="NULL",estado="Ativo")
         adiciona_post(conn=conn,login=creador,texto="DEMAIS ESSE PASSARO!!! @gabrielvf @samuelvgb",titulo="testando",url="NULL",estado="Ativo")
         adiciona_post(conn=conn,login=creador,texto="DEMAIS ESSE PASSARO @gabrielvf",titulo="teste",url="NULL",estado="Ativo")
@@ -255,8 +255,8 @@ class TestProjeto(unittest.TestCase):
     def test_lista_post_cron_rev(self):
         conn = self.__class__.connection
         creador = "antoniojaj"
-        adiciona_usuario(conn, login=creador,nome='Antonio Andraues', cidade="Sao Paulo")
-        adiciona_usuario(conn, login='gabrielvf',nome='Gabriel Francato', cidade="Sao Paulo")
+        adiciona_usuario(conn, login=creador,nome='Antonio Andraues', cidade="Sao Paulo",email="teste@com.br")
+        adiciona_usuario(conn, login='gabrielvf',nome='Gabriel Francato', cidade="Sao Paulo",email="teste@com.br")
         adiciona_post(conn, login=creador,texto="Legal demais",titulo="Top",url="NULL",estado="Ativo", date='2015-11-05 14:29:36',browser='safari',aparelho='MAC-os',IP='127.0.0.0')
         adiciona_post(conn=conn,login=creador,texto="Top Demais",titulo="Legal",url="NULL",estado="Ativo", date='2019-11-05 14:29:36',browser='safari',aparelho='MAC-os',IP='127.0.0.0')
         resultado = lista_post_cron_reverso(conn)
@@ -267,9 +267,9 @@ class TestProjeto(unittest.TestCase):
     def test_lista_usr_from_refs(self):
         conn = self.__class__.connection
         creador = "antoniojaj"
-        adiciona_usuario(conn, login=creador,nome='Antonio Andraues', cidade="Sao Paulo")
-        adiciona_usuario(conn, login='gabrielvf',nome='Gabriel Francato', cidade="Sao Paulo")
-        adiciona_usuario(conn, login='samuelgranato',nome='Gabriel Francato', cidade="Sao Paulo")
+        adiciona_usuario(conn, login=creador,nome='Antonio Andraues', cidade="Sao Paulo",email="teste@com.br")
+        adiciona_usuario(conn, login='gabrielvf',nome='Gabriel Francato', cidade="Sao Paulo",email="teste@com.br")
+        adiciona_usuario(conn, login='samuelgranato',nome='Gabriel Francato', cidade="Sao Paulo",email="teste@com.br")
         adiciona_post(conn=conn,login=creador,texto="DEMAIS ESSE PASSARO @gabrielvf @antoniojaj",titulo="teste",url="NULL",estado="Ativo",browser='safari',aparelho='MAC-os',IP='127.0.0.0')
         adiciona_post(conn=conn,login=creador,texto="DEMAIS ESSE PASSARO @gabrielvf",titulo="teste",url="NULL",estado="Ativo",browser='safari',aparelho='MAC-os',IP='127.0.0.0')
         adiciona_post(conn=conn,login='samuelgranato',texto="DEMAIS ESSE PASSARO @gabrielvf",titulo="teste",url="NULL",estado="Ativo",browser='safari',aparelho='MAC-os',IP='127.0.0.0')
@@ -290,7 +290,7 @@ class TestProjeto(unittest.TestCase):
     def test_adiciona_acao(self):
         conn = self.__class__.connection
         creador = "antoniojaj"
-        adiciona_usuario(conn, login=creador,nome='Antonio Andraues', cidade="Sao Paulo")
+        adiciona_usuario(conn, login=creador,nome='Antonio Andraues', cidade="Sao Paulo",email="teste@com.br")
         adiciona_post(conn=conn,login=creador,texto="DEMAIS ESSE PASSARO ",titulo="teste",url="NULL",estado="Ativo",browser='safari',aparelho='MAC-os',IP='127.0.0.0')
         post_id=acha_post(conn,creador,"teste")
         add_curtida(conn,login=creador,post_id=post_id,browser='safari',aparelho='MAC-os',IP='127.0.0.0')
