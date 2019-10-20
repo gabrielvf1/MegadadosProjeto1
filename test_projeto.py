@@ -93,7 +93,7 @@ class TestProjeto(unittest.TestCase):
     def test_adiciona_usuario(self):
         conn = self.__class__.connection
 
-        usuario = {"loginUsuario":'Antoniojaj',"Nome":'Antonio Andraues'}
+        usuario = {"loginUsuario": 'Antoniojaj', "Nome": 'Antonio Andraues'}
 
         # Adiciona se usuario não existente.
         adiciona_usuario(conn, login='Antoniojaj', nome='Antonio Andraues')
@@ -123,9 +123,11 @@ class TestProjeto(unittest.TestCase):
     def test_muda_email_usuario(self):
         conn = self.__class__.connection
 
-        adiciona_usuario(conn, login='antonio',nome='Antonio Andraues',email="teste@a.com")
+        adiciona_usuario(conn, login='antonio',
+                         nome='Antonio Andraues', email="teste@a.com")
 
-        muda_email_usuario(conn, login='antonio', novo_email='antonio@teste.com')
+        muda_email_usuario(conn, login='antonio',
+                           novo_email='antonio@teste.com')
 
     def test_lista_usuarios(self):
         conn = self.__class__.connection
@@ -137,7 +139,7 @@ class TestProjeto(unittest.TestCase):
         # Adiciona alguns usuarios.
         nomes = []
         for p in ('antonio', 'gabriel', 'teste'):
-            adiciona_usuario(conn, p,"Nome teste")
+            adiciona_usuario(conn, p, "Nome teste")
             nomes.append(acha_usuario(conn, p))
 
         # Verifica se os usuarios foram adicionadas corretamente.
@@ -154,111 +156,127 @@ class TestProjeto(unittest.TestCase):
 
     def test_post_ref(self):
         conn = self.__class__.connection
-        titulo="teste 123"
-        creador='antoniojaj'
-        adiciona_usuario(conn, login=creador,nome='Antonio Andraues',email="teste@a.com")
-        adiciona_usuario(conn, login='gabriel',nome='Gabriel Francato',email="teste@a.com")
+        titulo = "teste 123"
+        creador = 'antoniojaj'
+        adiciona_usuario(conn, login=creador,
+                         nome='Antonio Andraues', email="teste@a.com")
+        adiciona_usuario(conn, login='gabriel',
+                         nome='Gabriel Francato', email="teste@a.com")
         # Adiciona um post
-        adiciona_post(conn=conn,login=creador,texto="DEMAIS ESSE PASSARO @gabriel",titulo=titulo,url="NULL",estado="Ativo",browser='safari',aparelho='MAC-os',IP='127.0.0.0')
-        id_post=acha_post(conn,login=creador,titulo=titulo)
+        adiciona_post(conn=conn, login=creador, texto="DEMAIS ESSE PASSARO @gabriel", titulo=titulo,
+                      url="NULL", estado="Ativo", browser='safari', aparelho='MAC-os', IP='127.0.0.0')
+        id_post = acha_post(conn, login=creador, titulo=titulo)
 
-        res=lista_post_ref_user(conn,id_post)
-        self.assertEqual(first=res,second='gabriel')
+        res = lista_post_ref_user(conn, id_post)
+        self.assertEqual(first=res, second='gabriel')
 
     def test_post_ref_passaro(self):
         conn = self.__class__.connection
 
-        titulo="teste passaro ref"
-        creador='antoniojaj'
-        adiciona_usuario(conn, login=creador,nome='Antonio Andraues',email="teste@a.com")
+        titulo = "teste passaro ref"
+        creador = 'antoniojaj'
+        adiciona_usuario(conn, login=creador,
+                         nome='Antonio Andraues', email="teste@a.com")
         passaro = 'canario da terra'
 
         # Adiciona um passaro não existente.
         adiciona_passaro(conn, passaro)
         # Adiciona um post
-        adiciona_post(conn=conn,login=creador,texto="DEMAIS ESSE PASSARO #canario",titulo=titulo,url="NULL",estado="Ativo",browser='safari',aparelho='MAC-os',IP='127.0.0.0')
-        id_post=acha_post(conn,login=creador,titulo=titulo)
+        adiciona_post(conn=conn, login=creador, texto="DEMAIS ESSE PASSARO #canario", titulo=titulo,
+                      url="NULL", estado="Ativo", browser='safari', aparelho='MAC-os', IP='127.0.0.0')
+        id_post = acha_post(conn, login=creador, titulo=titulo)
 
-        res=lista_post_ref_pass(conn,id_post)
+        res = lista_post_ref_pass(conn, id_post)
 
-        self.assertEqual(first=res,second=passaro)
-
+        self.assertEqual(first=res, second=passaro)
 
     def test_adiciona_pref_pass(self):
         conn = self.__class__.connection
-        creador='antoniojaj'
-        adiciona_usuario(conn, login=creador,nome='Antonio Andraues',email="teste@a.com")
+        creador = 'antoniojaj'
+        adiciona_usuario(conn, login=creador,
+                         nome='Antonio Andraues', email="teste@a.com")
 
         # Nehuma pref
-        res = lista_pref_usr_pass(conn,creador)
+        res = lista_pref_usr_pass(conn, creador)
         self.assertCountEqual(res, [])
 
-         # Adiciona alguns passaros.
+        # Adiciona alguns passaros.
         passaros = []
         for p in ('canario', 'cacatua', 'canario da terra'):
             adiciona_passaro(conn, p)
-            adiciona_pref_pass(conn,creador,p)
+            adiciona_pref_pass(conn, creador, p)
             passaros.append(p)
 
-
         # Checando as preferencias
-        res = lista_pref_usr_pass(conn,creador)
+        res = lista_pref_usr_pass(conn, creador)
         self.assertCountEqual(res, passaros)
-        self.assertEqual(res[0],passaros[0])
-        self.assertEqual(res[1],passaros[1])
-        self.assertEqual(res[2],passaros[2])
-
+        self.assertEqual(res[0], passaros[0])
+        self.assertEqual(res[1], passaros[1])
+        self.assertEqual(res[2], passaros[2])
 
     def test_remove_pref_pass(self):
         conn = self.__class__.connection
-        creador='antoniojaj'
-        passaro='canario da terra'
-        adiciona_usuario(conn, login=creador,nome='Antonio Andraues',email="teste@a.com")
-        adiciona_passaro(conn,passaro)
-        adiciona_pref_pass(conn,creador,passaro)
+        creador = 'antoniojaj'
+        passaro = 'canario da terra'
+        adiciona_usuario(conn, login=creador,
+                         nome='Antonio Andraues', email="teste@a.com")
+        adiciona_passaro(conn, passaro)
+        adiciona_pref_pass(conn, creador, passaro)
 
         # Checa que ele foi removido corretamente
-        remove_pref_pass(conn, login=creador,passaro=passaro)
-        res=lista_pref_usr_pass(conn,creador)
+        remove_pref_pass(conn, login=creador, passaro=passaro)
+        res = lista_pref_usr_pass(conn, creador)
         self.assertCountEqual(res, [])
 
     def test_add_curtidas(self):
         conn = self.__class__.connection
-        creador='antoniojaj'
+        creador = 'antoniojaj'
 
-        adiciona_usuario(conn, login=creador,nome='Antonio Andraues')
-        adiciona_usuario(conn, login='gabrielvf',nome='Gabriel Francato')
-        adiciona_post(conn=conn,login=creador,texto="DEMAIS ESSE PASSARO @gabrielvf @samuel",titulo="teste",url="NULL",estado="Ativo",browser='safari',aparelho='MAC-os',IP='127.0.0.0')
-        id_post=acha_post(conn,login=creador,titulo="teste")
-        lista_de_curtidas=['antoniojaj','gabrielvf']
+        adiciona_usuario(conn, login=creador, nome='Antonio Andraues')
+        adiciona_usuario(conn, login='gabrielvf', nome='Gabriel Francato')
+        adiciona_post(conn=conn, login=creador, texto="DEMAIS ESSE PASSARO @gabrielvf @samuel",
+                      titulo="teste", url="NULL", estado="Ativo", browser='safari', aparelho='MAC-os', IP='127.0.0.0')
+        id_post = acha_post(conn, login=creador, titulo="teste")
+        lista_de_curtidas = ['antoniojaj', 'gabrielvf']
 
-        add_curtida(conn=conn,login='gabrielvf',post_id=id_post,browser='safari',aparelho='MAC-os',IP='127.0.0.0')
-        add_curtida(conn=conn,login='antoniojaj',post_id=id_post,browser='safari',aparelho='MAC-os',IP='127.0.0.1')
-        res=lista_curtidas(conn,id_post)
-        self.assertCountEqual(res,lista_de_curtidas)
-
+        add_curtida(conn=conn, login='gabrielvf', post_id=id_post,
+                    browser='safari', aparelho='MAC-os', IP='127.0.0.0')
+        add_curtida(conn=conn, login='antoniojaj', post_id=id_post,
+                    browser='safari', aparelho='MAC-os', IP='127.0.0.1')
+        res = lista_curtidas(conn, id_post)
+        self.assertCountEqual(res, lista_de_curtidas)
 
     def test_lista_user_famosos_regiao(self):
         conn = self.__class__.connection
         creador = "antoniojaj"
-        adiciona_usuario(conn, login=creador,nome='Antonio Andraues', cidade="Sao Paulo")
-        adiciona_usuario(conn, login='gabrielvf',nome='Gabriel Francato', cidade="Sao Paulo")
-        adiciona_usuario(conn, login='samuelvgb',nome='Samuel', cidade="Bahia")
-        adiciona_post(conn=conn,login=creador,texto="DEMAIS ESSE PASSARO @gabrielvf @antoniojaj",titulo="teste",url="NULL",estado="Ativo")
-        adiciona_post(conn=conn,login=creador,texto="DEMAIS ESSE PASSARO!!! @gabrielvf @samuelvgb",titulo="testando",url="NULL",estado="Ativo")
-        adiciona_post(conn=conn,login=creador,texto="DEMAIS ESSE PASSARO @gabrielvf",titulo="teste",url="NULL",estado="Ativo")
+        adiciona_usuario(conn, login=creador,
+                         nome='Antonio Andraues', cidade="Sao Paulo")
+        adiciona_usuario(conn, login='gabrielvf',
+                         nome='Gabriel Francato', cidade="Sao Paulo")
+        adiciona_usuario(conn, login='samuelvgb',
+                         nome='Samuel', cidade="Bahia")
+        adiciona_post(conn=conn, login=creador, texto="DEMAIS ESSE PASSARO @gabrielvf @antoniojaj",
+                      titulo="teste", url="NULL", estado="Ativo")
+        adiciona_post(conn=conn, login=creador, texto="DEMAIS ESSE PASSARO!!! @gabrielvf @samuelvgb",
+                      titulo="testando", url="NULL", estado="Ativo")
+        adiciona_post(conn=conn, login=creador, texto="DEMAIS ESSE PASSARO @gabrielvf",
+                      titulo="teste", url="NULL", estado="Ativo")
         resultado = lista_user_pop_cidade(conn)
-        resultado_deve_ser = [('Sao Paulo',3,'gabrielvf'),('Bahia', 1, 'samuelvgb')] 
-        self.assertListEqual(resultado,resultado_deve_ser)
-
+        resultado_deve_ser = [
+            ('Sao Paulo', 3, 'gabrielvf'), ('Bahia', 1, 'samuelvgb')]
+        self.assertListEqual(resultado, resultado_deve_ser)
 
     def test_lista_post_cron_rev(self):
         conn = self.__class__.connection
         creador = "antoniojaj"
-        adiciona_usuario(conn, login=creador,nome='Antonio Andraues', cidade="Sao Paulo")
-        adiciona_usuario(conn, login='gabrielvf',nome='Gabriel Francato', cidade="Sao Paulo")
-        adiciona_post(conn, login=creador,texto="Legal demais",titulo="Top",url="NULL",estado="Ativo", date='2015-11-05 14:29:36',browser='safari',aparelho='MAC-os',IP='127.0.0.0')
-        adiciona_post(conn=conn,login=creador,texto="Top Demais",titulo="Legal",url="NULL",estado="Ativo", date='2019-11-05 14:29:36',browser='safari',aparelho='MAC-os',IP='127.0.0.0')
+        adiciona_usuario(conn, login=creador,
+                         nome='Antonio Andraues', cidade="Sao Paulo")
+        adiciona_usuario(conn, login='gabrielvf',
+                         nome='Gabriel Francato', cidade="Sao Paulo")
+        adiciona_post(conn, login=creador, texto="Legal demais", titulo="Top", url="NULL", estado="Ativo",
+                      date='2015-11-05 14:29:36', browser='safari', aparelho='MAC-os', IP='127.0.0.0')
+        adiciona_post(conn=conn, login=creador, texto="Top Demais", titulo="Legal", url="NULL",
+                      estado="Ativo", date='2019-11-05 14:29:36', browser='safari', aparelho='MAC-os', IP='127.0.0.0')
         resultado = lista_post_cron_reverso(conn)
         date_time_str = resultado[0][6]
         date_time_str1 = resultado[1][6]
@@ -267,37 +285,45 @@ class TestProjeto(unittest.TestCase):
     def test_lista_usr_from_refs(self):
         conn = self.__class__.connection
         creador = "antoniojaj"
-        adiciona_usuario(conn, login=creador,nome='Antonio Andraues', cidade="Sao Paulo")
-        adiciona_usuario(conn, login='gabrielvf',nome='Gabriel Francato', cidade="Sao Paulo")
-        adiciona_usuario(conn, login='samuelgranato',nome='Gabriel Francato', cidade="Sao Paulo")
-        adiciona_post(conn=conn,login=creador,texto="DEMAIS ESSE PASSARO @gabrielvf @antoniojaj",titulo="teste",url="NULL",estado="Ativo",browser='safari',aparelho='MAC-os',IP='127.0.0.0')
-        adiciona_post(conn=conn,login=creador,texto="DEMAIS ESSE PASSARO @gabrielvf",titulo="teste",url="NULL",estado="Ativo",browser='safari',aparelho='MAC-os',IP='127.0.0.0')
-        adiciona_post(conn=conn,login='samuelgranato',texto="DEMAIS ESSE PASSARO @gabrielvf",titulo="teste",url="NULL",estado="Ativo",browser='safari',aparelho='MAC-os',IP='127.0.0.0')
-        res=lista_usr_from_refs(conn,'gabrielvf')
-        referencias_gabrielvf = ["antoniojaj","samuelgranato"]
-        self.assertCountEqual(res,referencias_gabrielvf)
-        self.assertListEqual(list(res),referencias_gabrielvf)
+        adiciona_usuario(conn, login=creador,
+                         nome='Antonio Andraues', cidade="Sao Paulo")
+        adiciona_usuario(conn, login='gabrielvf',
+                         nome='Gabriel Francato', cidade="Sao Paulo")
+        adiciona_usuario(conn, login='samuelgranato',
+                         nome='Gabriel Francato', cidade="Sao Paulo")
+        adiciona_post(conn=conn, login=creador, texto="DEMAIS ESSE PASSARO @gabrielvf @antoniojaj",
+                      titulo="teste", url="NULL", estado="Ativo", browser='safari', aparelho='MAC-os', IP='127.0.0.0')
+        adiciona_post(conn=conn, login=creador, texto="DEMAIS ESSE PASSARO @gabrielvf", titulo="teste",
+                      url="NULL", estado="Ativo", browser='safari', aparelho='MAC-os', IP='127.0.0.0')
+        adiciona_post(conn=conn, login='samuelgranato', texto="DEMAIS ESSE PASSARO @gabrielvf",
+                      titulo="teste", url="NULL", estado="Ativo", browser='safari', aparelho='MAC-os', IP='127.0.0.0')
+        res = lista_usr_from_refs(conn, 'gabrielvf')
+        referencias_gabrielvf = ["antoniojaj", "samuelgranato"]
+        self.assertCountEqual(res, referencias_gabrielvf)
+        self.assertListEqual(list(res), referencias_gabrielvf)
 
     def test_adiciona_tipo_acao(self):
         conn = self.__class__.connection
-        acoes=["Get","Post","Visualizacao"]
+        acoes = ["Get", "Post", "Visualizacao"]
         for a in acoes:
-            adiciona_tipo_acao(conn,a)
+            adiciona_tipo_acao(conn, a)
         res = lista_tipo_acoes(conn)
-        self.assertCountEqual(res,acoes)
-        self.assertListEqual(list(res),acoes)
+        self.assertCountEqual(res, acoes)
+        self.assertListEqual(list(res), acoes)
 
     def test_adiciona_acao(self):
         conn = self.__class__.connection
         creador = "antoniojaj"
-        adiciona_usuario(conn, login=creador,nome='Antonio Andraues', cidade="Sao Paulo")
-        adiciona_post(conn=conn,login=creador,texto="DEMAIS ESSE PASSARO ",titulo="teste",url="NULL",estado="Ativo",browser='safari',aparelho='MAC-os',IP='127.0.0.0')
-        post_id=acha_post(conn,creador,"teste")
-        add_curtida(conn,login=creador,post_id=post_id,browser='safari',aparelho='MAC-os',IP='127.0.0.0')
-        acoes=lista_tipo_acoes(conn)
-        self.assertIn('adiciona_post',acoes)
-        self.assertIn('curtir',acoes)
-
+        adiciona_usuario(conn, login=creador,
+                         nome='Antonio Andraues', cidade="Sao Paulo")
+        adiciona_post(conn=conn, login=creador, texto="DEMAIS ESSE PASSARO ", titulo="teste",
+                      url="NULL", estado="Ativo", browser='safari', aparelho='MAC-os', IP='127.0.0.0')
+        post_id = acha_post(conn, creador, "teste")
+        add_curtida(conn, login=creador, post_id=post_id,
+                    browser='safari', aparelho='MAC-os', IP='127.0.0.0')
+        acoes = lista_tipo_acoes(conn)
+        self.assertIn('adiciona_post', acoes)
+        self.assertIn('curtir', acoes)
 
 def run_sql_script(filename):
     global config
@@ -314,7 +340,7 @@ def run_sql_script(filename):
 
 def setUpModule():
     filenames = [entry for entry in os.listdir()
-        if os.path.isfile(entry) and re.match(r'.*_\d{3}\.sql', entry)]
+                 if os.path.isfile(entry) and re.match(r'.*_\d{3}\.sql', entry)]
     for filename in filenames:
         run_sql_script(filename)
 
