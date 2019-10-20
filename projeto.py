@@ -34,6 +34,7 @@ def lista_passaros(conn):
         res = cursor.fetchall()
         passaros = tuple(x[0] for x in res)
         return passaros
+
 #Adiona um usuario ao banco utilizando como entrada login e nome sendo obrigatorios
 def adiciona_usuario(conn,login,nome,email="NULL",cidade="NULL"):
     with conn.cursor() as cursor:
@@ -41,7 +42,6 @@ def adiciona_usuario(conn,login,nome,email="NULL",cidade="NULL"):
             cursor.execute('INSERT INTO Usuarios (Login,Nome,Email,Cidade) VALUES (%s,%s,%s,%s)', (login,nome,email,cidade))
         except pymysql.err.IntegrityError as e:
             raise ValueError(f'Não posso inserir {nome} na tabela usuario')
-
 
 #acha um usuario presente no banco de dados atraves do seu login
 def acha_usuario(conn, login):
@@ -52,6 +52,7 @@ def acha_usuario(conn, login):
             return res[0]
         else:
             return None
+
 # remove um usuario atraves do seu login
 def remove_usuario(conn, login):
     with conn.cursor() as cursor:
@@ -65,6 +66,7 @@ def muda_email_usuario(conn, login, novo_email):
             cursor.execute('UPDATE Usuarios SET Email=%s where Login=%s', (novo_email, login))
         except pymysql.err.IntegrityError as e:
             raise ValueError(f'Não posso alterar o Email do id {login} para {novo_email} na tabela Usuarios')
+
 # Lista os usuarios presentes na base
 def lista_usuarios(conn):
     with conn.cursor() as cursor:
@@ -72,6 +74,7 @@ def lista_usuarios(conn):
         res = cursor.fetchall()
         usuarios = tuple(x[0] for x in res)
         return usuarios
+
 # Acha um post de um usuario , o mesmo precisa do login do usario e do titulo para diferenciar de outros posts do mesmo usuario
 def acha_post(conn, login, titulo):
    with conn.cursor() as cursor:
@@ -81,6 +84,7 @@ def acha_post(conn, login, titulo):
             return res[0]
         else:
             return None
+
 # Insere um post novo ao banco. Reconhecendo quem foi marcado e passaros referenciados. Aqui a logica de adicionar em todas tabelas
 def adiciona_post(conn, login,texto,titulo,url="NULL",estado="Ativo",date="NULL",browser="NULL",aparelho="NULL",IP="0.0.0.0"):
     with conn.cursor() as cursor:
@@ -115,10 +119,10 @@ def adiciona_post(conn, login,texto,titulo,url="NULL",estado="Ativo",date="NULL"
                             na tabela Posts')
 
 #funcao que faz o delete logico do post, ou seja para remover um post voce deve realizar um update na coluna Estado para inativo.
-def remove_post(conn, login, postid): 
+def remove_post(conn, login, postid):
     with conn.cursor() as cursor:
         cursor.execute('UPDATE Posts SET Estado=%s WHERE idPost=%s',('Inativo',postid))
-    
+
 #lista quais usuarios foram citados em um post especifico, recebendo o id do post
 def lista_post_ref_user(conn,idPost):
     with conn.cursor() as cursor:
@@ -128,6 +132,7 @@ def lista_post_ref_user(conn,idPost):
             return res[0]
         else:
             return None
+
 #lista no post os passaros referenciados
 def lista_post_ref_pass(conn,idPost):
     with conn.cursor() as cursor:
@@ -137,7 +142,8 @@ def lista_post_ref_pass(conn,idPost):
             return res[0]
         else:
             return None
-# Ve todas referencias ativas do usuario 
+
+# Ve todas referencias ativas do usuario
 def lista_usr_ref_posts(conn, login):
     with conn.cursor() as cursor:
         cursor.execute('SELECT Posts.idPost from User_ref INNER JOIN Posts USING(idPost) WHERE Posts.Estado=%s and User_ref=%s' , ("Ativo",login))
@@ -166,6 +172,7 @@ def lista_pref_usr_pass(conn,login):
         res = cursor.fetchall()
         passaros = tuple(x[0] for x in res)
         return passaros
+
 def add_curtida(conn,login,post_id,browser,aparelho,IP):
     with conn.cursor() as cursor:
         try:
@@ -182,8 +189,6 @@ def lista_curtidas(conn,post_id):
 
         pessoas = tuple(x[0] for x in res)
         return pessoas
-
-
 
 #Lista Usuarios mais Populares de Cada cidade
 def lista_user_pop_cidade(conn):
@@ -208,7 +213,6 @@ def lista_user_pop_cidade(conn):
                 listaRegiao.append(i[0])
                 listaResultado.append(i)
             populares = tuple(x for x in listaResultado)
-            print(list(populares))
             return list(populares)
 
         except pymysql.err.IntegrityError as e:
@@ -269,37 +273,3 @@ def adiciona_acao(conn,login,nome_acao,browser,aparelho,IP):
         except pymysql.err.IntegrityError as e:
             raise ValueError(f'Não posso inserir a acao do usuario {login} \
                             na tabela Acoes')
-
-
-# def lista_acoes_usr(conn,login):
-#     with conn.cursor() as cursor:
-#         try:
-#             curso
-    
-# INSERT INTO #table1 (id, guidd, TimeAdded, ExtraData)
-# SELECT #table2.id, #table2.guidd, #table2.TimeAdded, #table2.ExtraData
-# FROM #table2
-# LEFT JOIN #table1 on #table1.id = #table2.id
-# WHERE #table1.id is null
-
-# def adiciona_perigo_a_comida(conn, id_perigo, id_comida):
-#     with conn.cursor() as cursor:
-#         cursor.execute('INSERT INTO comida_perigo VALUES (%s, %s)', (id_comida, id_perigo))
-
-# def remove_perigo_de_comida(conn, id_perigo, id_comida):
-#     with conn.cursor() as cursor:
-#         cursor.execute('DELETE FROM comida_perigo WHERE id_perigo=%s AND id_comida=%s',(id_perigo, id_comida))
-
-# def lista_comidas_de_perigo(conn, id_perigo):
-#     with conn.cursor() as cursor:
-#         cursor.execute('SELECT id_comida FROM comida_perigo WHERE id_perigo=%s', (id_perigo))
-#         res = cursor.fetchall()
-#         comidas = tuple(x[0] for x in res)
-#         return comidas
-
-# def lista_passaros_de_comida(conn, id_comida):
-#     with conn.cursor() as cursor:
-#         cursor.execute('SELECT id_perigo FROM comida_perigo WHERE id_comida=%s', (id_comida))
-#         res = cursor.fetchall()
-#         perigos = tuple(x[0] for x in res)
-#         return perigos
