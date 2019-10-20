@@ -185,7 +185,7 @@ class TestProjeto(unittest.TestCase):
 
         res = lista_post_ref_pass(conn, id_post)
 
-        self.assertEqual(first=res, second=passaro)
+        self.assertEqual(first=res[0], second=passaro)
 
     def test_adiciona_pref_pass(self):
         conn = self.__class__.connection

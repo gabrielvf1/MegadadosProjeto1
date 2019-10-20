@@ -99,19 +99,21 @@ def adiciona_post(conn, login,texto,titulo,url="NULL",estado="Ativo",date="NULL"
                 cursor.execute('INSERT INTO Posts (Texto,Titulo,loginUsuario,URL_IMG,Estado,Data)\
                     VALUES (%s,%s,%s,%s,%s,%s)', (texto,titulo,login,url,estado,date))
             id_post=acha_post(conn,login,titulo)
-            palavras=texto.split()
-            for word in palavras:
-                if(word[0]=="@"):
-                    cursor.execute("""SELECT Login FROM Usuarios WHERE Login LIKE %s""", ('%' + word[1:] + '%',))
-                    res = cursor.fetchone()
-                    if res:
-                        cursor.execute('INSERT INTO User_ref (idPost,loginUsuario) VALUES (%s,%s)', (id_post,word[1:]))
-                if(word[0]=="#"):
-                    cursor.execute("""SELECT Nome FROM Desc_passaros WHERE Nome LIKE %s""", ('%' + word[1:] + '%',))
+            if(texto != None):
 
-                    res = cursor.fetchone()
-                    if res:
-                        cursor.execute('INSERT INTO Pass_ref (idPost,nomePassaro) VALUES (%s,%s)', (id_post,res[0]))
+                palavras=texto.split()
+                for word in palavras:
+                    if(word[0]=="@"):
+                        cursor.execute("""SELECT Login FROM Usuarios WHERE Login LIKE %s""", ('%' + word[1:] + '%',))
+                        res = cursor.fetchone()
+                        if res:
+                            cursor.execute('INSERT INTO User_ref (idPost,loginUsuario) VALUES (%s,%s)', (id_post,word[1:]))
+                    if(word[0]=="#"):
+                        cursor.execute("""SELECT Nome FROM Desc_passaros WHERE Nome LIKE %s""", ('%' + word[1:] + '%',))
+
+                        res = cursor.fetchone()
+                        if res:
+                            cursor.execute('INSERT INTO Pass_ref (idPost,nomePassaro) VALUES (%s,%s)', (id_post,res[0]))
             adiciona_acao(conn=conn,login=login,nome_acao='adiciona_post',browser=browser,aparelho=aparelho,IP=IP)    
 
 
@@ -140,11 +142,9 @@ def lista_post_ref_user(conn,idPost):
 def lista_post_ref_pass(conn,idPost):
     with conn.cursor() as cursor:
         cursor.execute('SELECT nomePassaro from Pass_ref INNER JOIN Posts USING(idPost) WHERE Pass_ref.idPost=%s and Posts.Estado=%s', (idPost, "Ativo"))
-        res = cursor.fetchone()
-        if res:
-            return res[0]
-        else:
-            return None
+        res = cursor.fetchall()
+        passaros = tuple(x[0] for x in res)
+        return passaros
 
 # Ve todas referencias ativas do usuario
 def lista_usr_ref_posts(conn, login):
