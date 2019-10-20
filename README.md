@@ -11,8 +11,8 @@ Modelo Relacional:
 
 
 # FASE 2
-Modelo Entidade Relacional *Atualizado*:
+Modelo Entidade Relacional __Atualizado:
 ![Alt text](megadadosEntidadeRelacional2.jpg?raw=true "Modelo Entidade Relacional 2")
 
-Modelo Relacional *Atualizado*:
+Modelo Relacional __Atualizado:
 ![Alt text](megadadosRelacional2.jpg?raw=true "Modelo Relacional 2")
